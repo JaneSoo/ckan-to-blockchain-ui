@@ -1,0 +1,5 @@
+Flask==1.1.2
+click
+web3
+eth-testrpc
+eth-tester

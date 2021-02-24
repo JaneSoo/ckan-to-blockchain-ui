@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <br>
+  <p align='center'> 
+    <b>Ethereum Address (Rinkeby Test network):</b>
+    <a href="https://rinkeby.etherscan.io/address/0xE8A94362bdaF3755f01fC4DeB10c9AA473be7803" target="_blank"> View transactions on Etherscan</a>
+  </p>
+  <div class="col-md-12" align="center">
+    <button class="btn btn-info" id="btn-store-data" onclick="loadInputUrl()">Store data</button>
+    <button class="btn btn-primary" id="bth-verify-data" onclick="loadInputUrl()">Verify data</button>
+  </div>
+  <br>
+  <div class="col-md-12 input-group" align="center">
+    <input type="hidden" id="ckan-input-url" name="Ckan Url" placeholder="Valid Ckan API URL package list" class="form-control">
+    <button class="btn btn-info" id="find-ckan-packages" hidden="hidden">Go</button>
+  </div>
+{% endblock %}

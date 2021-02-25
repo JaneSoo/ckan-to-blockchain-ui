@@ -23,12 +23,6 @@
     <div class="container">
       {% block content %} {% endblock %}
     </div>
-    <!-- <script type="text/javascript" src="{{url_for('static', filename='js/index.js')}}"></script> -->
-    <script>
-      function loadInputUrl() {
-        document.getElementById('ckan-input-url').type = "url";
-        document.getElementById('find-ckan-packages').hidden = false;
-      }
-    </script>
+    <script type="text/javascript" src="{{url_for('static', filename='index.js')}}"></script>
   </body>
 </html>

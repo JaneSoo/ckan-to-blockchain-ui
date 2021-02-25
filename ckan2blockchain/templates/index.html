@@ -6,13 +6,24 @@
     <b>Ethereum Address (Rinkeby Test network):</b>
     <a href="https://rinkeby.etherscan.io/address/0xE8A94362bdaF3755f01fC4DeB10c9AA473be7803" target="_blank"> View transactions on Etherscan</a>
   </p>
-  <div class="col-md-12" align="center">
-    <button class="btn btn-info" id="btn-store-data" onclick="loadInputUrl()">Store data</button>
-    <button class="btn btn-primary" id="bth-verify-data" onclick="loadInputUrl()">Verify data</button>
-  </div>
-  <br>
-  <div class="col-md-12 input-group" align="center">
-    <input type="hidden" id="ckan-input-url" name="Ckan Url" placeholder="Valid Ckan API URL package list" class="form-control">
-    <button class="btn btn-info" id="find-ckan-packages" hidden="hidden">Go</button>
-  </div>
+  <div class="container">
+    <p>Please specify valid CKAN api url to store or verify data. Example: <a href="https://opendata.praha.eu/api/3/action/package_list">https://opendata.praha.eu/api/3/action/package_list</a></p>
+    <div class="input-group" align="center">
+      <input required id="ckan-input-url" name="Ckan Url" placeholder="Valid Ckan API URL package list" class="form-control">
+      <button class="btn btn-info" id="find-ckan-packages" onclick="getPackages()">Go</button>
+    </div>
+
+    <label style="visibility: hidden; margin-top: 15px; margin-left: 5px;" for="packages" id="label-select"> Choose package</label>
+    <div align="center">
+      <select style="visibility: hidden" name="packages" id="packages", class="form-control">
+      </select>
+    </div>
+    <br>
+    <div align="center">
+      <button style="visibility: hidden;" class="btn btn-info" id="btn-store-data" onclick="loadInputUrl()">Store data</button>
+      <button style="visibility: hidden;" class="btn btn-primary" id="bth-verify-data" onclick="loadInputUrl()">Verify data</button>
+    </div>
+    <br>
+  </div>  
+
 {% endblock %}

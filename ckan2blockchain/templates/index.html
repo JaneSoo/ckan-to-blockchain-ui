@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+  {% for category, message in get_flashed_messages(with_categories=True) %}
+    <div class="alert-{{category}}">{{ message }}</div>
+  {% endfor %}
   <br>
   <p align='center'> 
     <b>Ethereum Address (Rinkeby Test network):</b>
@@ -20,8 +23,8 @@
     </div>
     <br>
     <div align="center">
-      <button style="visibility: hidden;" class="btn btn-info" id="btn-store-data" onclick="loadInputUrl()">Store data</button>
-      <button style="visibility: hidden;" class="btn btn-primary" id="bth-verify-data" onclick="loadInputUrl()">Verify data</button>
+      <button style="visibility: hidden;" class="btn btn-info" id="btn-store-package" onclick="storePackage()">Store package</button>
+      <button style="visibility: hidden;" class="btn btn-primary" id="bth-verify-package" onclick="verifyPackage()">Verify package</button>
     </div>
     <br>
   </div>  

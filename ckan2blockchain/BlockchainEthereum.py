@@ -1,35 +1,31 @@
-import argparse
-import getpass
-import hashlib, time
-import json
-import binascii
-
-import sys
-
 from web3 import Web3, EthereumTesterProvider, HTTPProvider
 from eth_account import Account
 from eth_tester import EthereumTester
-import ethereum.exceptions
-import pdb
+from decouple import config
+
+import argparse, getpass, hashlib, time, json, binascii, sys, ethereum.exceptions, pdb
 
 class BlockchainEthereum:
 
     # methods called from main.py
 
-    def __init__(self, cli_args, ini_args, logger):
-        self.cli_args = cli_args
-        self.ini_args = ini_args
-        self.logger = logger
+    # def __init__(self, cli_args, ini_args, logger):
+    #     self.cli_args = cli_args
+    #     self.ini_args = ini_args
+    #     self.logger = logger
 
-        provider = self.ini_args.get('ethereum','provider')
-        if provider == 'test':
-            self.w3 = Web3(EthereumTesterProvider())
-        elif provider == 'local':
-            self.w3 = Web3(Web3.IPCProvider())
-        elif provider == 'network':
-            self.w3 = Web3(HTTPProvider('https://rinkeby.infura.io/v3/0c8c84ad8965460489bbdd389b3dd0fd'))
-        else:
-            self.w3 = Web3(HTTPProvider(provider))
+    #     provider = self.ini_args.get('ethereum','provider')
+    #     if provider == 'test':
+    #         self.w3 = Web3(EthereumTesterProvider())
+    #     elif provider == 'local':
+    #         self.w3 = Web3(Web3.IPCProvider())
+    #     elif provider == 'network':
+    #         self.w3 = Web3(HTTPProvider('https://rinkeby.infura.io/v3/0c8c84ad8965460489bbdd389b3dd0fd'))
+    #     else:
+    #         self.w3 = Web3(HTTPProvider(provider))
+
+    def __init__(self):
+        self.w3 = Web3(HTTPProvider('https://rinkeby.infura.io/v3/0c8c84ad8965460489bbdd389b3dd0fd'))
 
     def handle_command(self, command):
         if command=='eth-create-address':
@@ -48,28 +44,25 @@ class BlockchainEthereum:
                 sys.exit('Error storing private key: ' + str(e))
 
             self.__load_private_key()
-
+    
     def add_to_blockchain(self, dataset_hashes):
         dataset_ids = list(dataset_hashes.keys())
         if len(dataset_ids) == 0:
             return
-
+        
         header = str(binascii.hexlify(b"ckan2blockchain.1."), 'utf-8')
         header_len = len(header)//2
         entry_len = (len(dataset_ids[0]) + len(dataset_hashes[dataset_ids[0]]))//2
-        entries_per_tx = (self.ini_args.getint('ethereum', 'maximum_transaction_size') - header_len) // entry_len
+        entries_per_tx = (65536 - header_len)//entry_len
 
         for i in range(0, len(dataset_ids), entries_per_tx):
             data1 = ''
             for x in dataset_ids[i:i+entries_per_tx]:
-                # pdb.set_trace()
                 data1 = header + ''.join(x+dataset_hashes[x])
-
+            
             data = header + ''.join(x+dataset_hashes[x] for x in dataset_ids[i:i+entries_per_tx])
-            # pdb.set_trace()
-            self.logger.info('Sending transaction to blockchain: '+data)
-            self.__send_data(data)
-        
+            self.send_data(data)
+
     # private methods
     def __ask_decrypt_password(self):
         if hasattr(self, 'decrypt_password'):
@@ -108,31 +101,54 @@ class BlockchainEthereum:
                     'nonce': self.w3.eth.getTransactionCount(self.w3.eth.coinbase),
                 })
 
-    def __send_data(self, data):
+    def verify_transaction(self, dataset_hashes, package, full_url):
+        dataset_ids = list(dataset_hashes.keys())
+        if len(dataset_ids) == 0:
+            return
+        
+        header = str(binascii.hexlify(b"ckan2blockchain.1."), 'utf-8')
+        header_len = len(header)//2
+        entry_len = (len(dataset_ids[0]) + len(dataset_hashes[dataset_ids[0]]))//2
+        entries_per_tx = (65536 - header_len)//entry_len
 
-        self.__load_private_key()
-        account = Account.privateKeyToAccount(self.private_key)
+        for i in range(0, len(dataset_ids), entries_per_tx):            
+            data = header + ''.join(x+dataset_hashes[x] for x in dataset_ids[i:i+entries_per_tx])
 
-        signed_transaction = self.w3.eth.account.signTransaction({
-            'nonce': self.w3.eth.getTransactionCount(account.address, 'pending'),
-            'gasPrice': self.w3.eth.gasPrice,
-            'gas': 900000, # should be auto-calculated
+        with open('data.json') as json_file:
+            trx_hashes = json.load(json_file)
+            trx_hash = trx_hashes[f'{full_url}'][0].get(package)
+            if trx_hash:
+                transaction = self.w3.eth.getTransaction(trx_hash)
+                if transaction:
+                    input_value = transaction.input[2:] if transaction.input.startswith("0x") else transaction.input
+                    return (data == input_value)
 
-            'to': self.ini_args.get('ethereum', 'target_address'), 
+    def send_data(self, data):
+        try:
+            with open(config('private_key_file')) as keyfile:
+                keyfile_json = keyfile.read()
+            private_key = Account.decrypt(keyfile_json, config('PASSWORD'))
+        except (ValueError, OSError) as e:
+            sys.exit('Error loading private key: ' + str(e))
 
+        account = Account.privateKeyToAccount(private_key)
+        
+        w3 = Web3(HTTPProvider('https://rinkeby.infura.io/v3/0c8c84ad8965460489bbdd389b3dd0fd'))
+        signed_transaction = w3.eth.account.signTransaction({
+            'nonce': w3.eth.getTransactionCount(account.address, 'pending'),
+            'gasPrice': w3.eth.gasPrice,
+            'gas': 900000,
+
+            'to': config('ADDRESS'),
             'value': 0,
             'data': data
-        }, self.private_key)
-
-        # FIXME: gasPrice? nonce?
-        # FIXME: error checking?
+        }, private_key)
 
         try:
-            self.w3.eth.sendRawTransaction(signed_transaction.rawTransaction)
+            w3.eth.sendRawTransaction(signed_transaction.rawTransaction)
         except ethereum.exceptions.InsufficientBalance as e:
-            self.logger.error('Error sending transaction to blockchain: ' + str(e))
+            print(str(e))
             return False
-
         return True
 
     # class methods

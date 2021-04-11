@@ -1,16 +1,10 @@
 #! /usr/bin/env python3
-from flask import Flask
-import pdb
-import configparser
-import argparse
-import sys
-import logging, logging.handlers
-
+from flask import Flask, render_template, jsonify, make_response, request, flash
+from flask_restful import Resource, Api, reqparse, abort
 from CkanCrawler import CkanCrawler
-
 from BlockchainEthereum import BlockchainEthereum
 
-app = Flask(__name__)
+import hashlib, json, time, sys, urllib.request, urllib.parse, pdb, configparser, argparse, sys, logging, logging.handlers, re
 
 class Ckan2Blockchain:
 
@@ -119,9 +113,85 @@ class Ckan2Blockchain:
         self.handle_command(self.cli_args.command)
         self.chain.handle_command(self.cli_args.command)
 
+
+app = Flask(__name__)
+api = Api(app)
+app.secret_key = 'my unobvious secret key'
+
+parser = reqparse.RequestParser()
+parser.add_argument('package')
+parser.add_argument('url')
+
+class PackageHash(Resource):
+    def post(self):
+        args = parser.parse_args()
+        package = args['package']
+        full_url = args['url']
+        url = re.sub('/action/package.*', '', full_url)
+        obj_ckan = CkanCrawler(package)
+        results = {}
+
+        (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
+        results[package_hash] = dataset_hash
+
+        obj_blockchainethereum = BlockchainEthereum()
+        confirm = obj_blockchainethereum.verify_transaction(results, package, full_url)
+        return {'result': f'{confirm}'}
+
+api.add_resource(PackageHash, '/requestPackageHash')
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/get-packages', methods=["POST"])
+def get_packages():
+    url = request.get_json()['url']
+    res = urllib.request.urlopen(url).read()
+    res_json = json.loads(res.decode())
+    res = make_response(jsonify({"package_lists": res_json['result']}), 200)
+    return res
+
+@app.route('/store-package', methods=["POST"])
+def store_package():
+    url = request.get_json()['url']
+    package = request.get_json()['package']
+
+    #1 download package and hash
+    obj_ckan = CkanCrawler(package)
+    results = {}
+    url = re.sub('/action/package.*', '', url)
+    (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
+    results[package_hash] = dataset_hash
+
+    #2 add to blockchain
+    obj_blockchainethereum = BlockchainEthereum()
+    obj_blockchainethereum.add_to_blockchain(results)
+    # flash('Transaction has been sent!', 'info')
+    return results
+
+@app.route('/verify-package', methods=["POST"])
+def verify_data():
+    full_url = request.get_json()['url']
+    package = request.get_json()['package']
+
+    #1 download package and hash
+    obj_ckan = CkanCrawler(package)
+    results = {}
+    url = re.sub('/action/package.*', '', full_url)
+    (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
+    results[package_hash] = dataset_hash
+
+    obj_blockchainethereum = BlockchainEthereum()
+    confirm = obj_blockchainethereum.verify_transaction(results, package, full_url)    
+    print("Dataset "+package+" is "+str(confirm))
+    return str(confirm)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 if __name__ == '__main__':
-    # app = Ckan2Blockchain()
-    # app.main()
     app.run(host='127.0.0.1', port=3000, debug=True)
 
 # vim: ai ts=4 sts=4 et sw=4 ft=python

@@ -1,15 +1,18 @@
 #!/usr/bin/python3
 
-import hashlib, json, time, sys, urllib.request, urllib.parse
-import pdb
+import hashlib, json, time, sys, urllib.request, urllib.parse, pdb
 
 class CkanCrawler:
-    def __init__(self, cli_args, ini_args, logger):
-        self.cli_args = cli_args
-        self.ini_args = ini_args
-        self.logger = logger
+    # def __init__(self, cli_args, ini_args, logger):
+    #     self.cli_args = cli_args
+    #     self.ini_args = ini_args
+    #     self.logger = logger
 
-        self.base_url = self.ini_args.get('ckan', 'url').rstrip('/') + '/api/3'
+    #     self.base_url = self.ini_args.get('ckan', 'url').rstrip('/') + '/api/3'
+    
+    def __init__(self, package):
+        self.package = package
+
 
     # get list of all published packages (ids)
     def get_package_list(self):
@@ -27,52 +30,46 @@ class CkanCrawler:
 
 
     # get list of all resource urls from specified package
-    def get_package_resources(self, package):
-        for retry in range(1,self.ini_args.getint('ckan','retries')):
-            try: 
-                url = self.base_url + '/action/package_show?'+urllib.parse.urlencode({'id':package})
-                res = urllib.request.urlopen(url).read()
+    def get_package_resources(self, url, package):
+        for retry in range(1, 5):
+            try:
+                newurl = url + '/action/package_show?' + urllib.parse.urlencode({'id' :package})
+                res = urllib.request.urlopen(newurl).read()
                 res_json = json.loads(res.decode())
                 resource_urls = []
                 for resource in res_json['result']['resources']:
                     resource_urls.append(resource['url'])
                 return resource_urls
-
+            
             except Exception as e:
-                self.__error_sleep("failed to get package details (will retry): "+str(e))
-
-        raise Exception("failed to get package details id=%s" % package)
+                print('Failed to get package details (will try): ' + str(e))
+        
+        raise Exception("failed to get package details id=%s" %package)
 
     # compute hash of remote content
     def hash_url(self, url):
-        #TODO: validate url (http[s] only & whitelists)
-
-        for retry in range(1,self.ini_args.getint('ckan','retries')):
-            try: 
-                self.logger.info("download \"%s\" try=%d" % (url, retry))
-                h = hashlib.sha256()
+        for retry in range(1, 5):
+            try:
+                hdata = hashlib.sha256()
                 f = urllib.request.urlopen(url)
-                # pdb.set_trace()
                 for chunk in iter(lambda: f.read(4096), b""):
-                    h.update(chunk)
-                return h.hexdigest()
-
+                    hdata.update(chunk)
+            
+                return hdata.hexdigest()
+            
             except Exception as e:
-                self.__error_sleep("download failed: "+str(e))
+                print("error download")
+            
         print("success: hash_url")
-
         raise Exception("Failed to download resource")
 
-
-    # compute hash from a (sorted) list of remote urls
-    def hash_urls(self, urls): 
+    # compute hash from a (sorted) list of remote urls    
+    def hash_urls(self, urls):
         hashes = []
         urls.sort()
         for url in urls:
             h = self.hash_url(url)
             hashes.append(h)
-            self.logger.info("remote file hash is: " + h)
-
         hashes_json = json.dumps(hashes)
         print("success: hash_urls")
         return hashlib.sha256(hashes_json.encode('utf-8')).hexdigest()
@@ -81,16 +78,13 @@ class CkanCrawler:
         self.logger.error(message)
         time.sleep(self.ini_args.getint('ckan','retry_delay'))
 
-    def hash_package(self, package):
-        resource_urls = self.get_package_resources(package)
+    def hash_package1(self, url, package):
+        resource_urls = self.get_package_resources(url, package)
         h = self.hash_urls(resource_urls)
         id_hash = hashlib.md5(package.encode('utf-8')).hexdigest()
-        self.logger.info("package " + package + " (" + id_hash + ") hash is: " + h);
-        print("success: hash_package")
-        return (id_hash, h)
+        return(id_hash, h)
 
     def hash_all_packages(self):
-        # pdb.set_trace()
         # get list of published packages
         packages = self.get_package_list()
 

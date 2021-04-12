@@ -154,19 +154,39 @@ def get_packages():
 
 @app.route('/store-package', methods=["POST"])
 def store_package():
-    url = request.get_json()['url']
+    full_url = request.get_json()['url']
     package = request.get_json()['package']
 
     #1 download package and hash
     obj_ckan = CkanCrawler(package)
     results = {}
-    url = re.sub('/action/package.*', '', url)
+    url = re.sub('/action/package.*', '', full_url)
     (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
     results[package_hash] = dataset_hash
 
     #2 add to blockchain
     obj_blockchainethereum = BlockchainEthereum()
-    obj_blockchainethereum.add_to_blockchain(results)
+    trx_hash = obj_blockchainethereum.add_to_blockchain(results)
+
+    #3 store package name and transaction key to json
+    with open('data1.json', 'r') as json_file:
+        data = json.load(json_file)
+        if full_url in data:
+            if package in data[full_url][0]:
+                data[full_url][0][package] = trx_hash.hex()
+            else:
+                data[full_url][0].update({
+                    f'{package}': trx_hash.hex()
+                })
+        else:
+            data[full_url] = []
+            data[full_url].append({
+                f'{package}': trx_hash.hex()
+            })
+
+    with open('data1.json', 'w') as json_file:
+        json.dump(data, json_file)
+
     # flash('Transaction has been sent!', 'info')
     return results
 

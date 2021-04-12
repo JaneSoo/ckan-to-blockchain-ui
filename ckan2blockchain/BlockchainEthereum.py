@@ -61,7 +61,8 @@ class BlockchainEthereum:
                 data1 = header + ''.join(x+dataset_hashes[x])
             
             data = header + ''.join(x+dataset_hashes[x] for x in dataset_ids[i:i+entries_per_tx])
-            self.send_data(data)
+            trx_hash = self.send_data(data)
+        return trx_hash
 
     # private methods
     def __ask_decrypt_password(self):
@@ -114,7 +115,7 @@ class BlockchainEthereum:
         for i in range(0, len(dataset_ids), entries_per_tx):            
             data = header + ''.join(x+dataset_hashes[x] for x in dataset_ids[i:i+entries_per_tx])
 
-        with open('data.json') as json_file:
+        with open('data1.json') as json_file:
             trx_hashes = json.load(json_file)
             trx_hash = trx_hashes[f'{full_url}'][0].get(package)
             if trx_hash:
@@ -145,7 +146,7 @@ class BlockchainEthereum:
         }, private_key)
 
         try:
-            w3.eth.sendRawTransaction(signed_transaction.rawTransaction)
+            return w3.eth.sendRawTransaction(signed_transaction.rawTransaction)
         except ethereum.exceptions.InsufficientBalance as e:
             print(str(e))
             return False

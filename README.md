@@ -8,6 +8,6 @@
 4. create `.env` file following `.env.example`
 
 #### To start the app
-Navigate to `ckantoblockchain` folder and run `python3 main.py`
+Navigate to `ckan2blockchain` folder and run `python3 main.py`
 
 

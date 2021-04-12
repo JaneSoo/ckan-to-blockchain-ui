@@ -2,6 +2,7 @@ ckan2blockchain.egg-info
 build
 dist
 playground
+/ckan2blockchain/etc
 *~
 .*.sw?
 **/__pycache__
@@ -144,4 +145,3 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-etc/

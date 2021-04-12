@@ -1,5 +1,5 @@
 # ckan-to-blockchain-ui
-`ckan2blockchain-ui` is built on top of [ckan2blockchain](https://github.com/milankowww/ckan2blockchain) and to finish off the verification part. It allows easier store and verify dataset package on ethereum blockchain through webpage.
+`ckan-to-blockchain-ui` is built on top of [ckan2blockchain](https://github.com/milankowww/ckan2blockchain) and to finish off the verification part. It allows easier store and verify dataset package on ethereum blockchain through webpage.
 
 #### Prerequisite
 1. Python 3

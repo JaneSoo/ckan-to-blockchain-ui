@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-from flask import Flask, render_template, jsonify, make_response, request, flash
+from flask import Flask, render_template, jsonify, make_response, request
 from flask_restful import Resource, Api, reqparse, abort
 from CkanCrawler import CkanCrawler
 from BlockchainEthereum import BlockchainEthereum
@@ -187,7 +187,6 @@ def store_package():
     with open('data1.json', 'w') as json_file:
         json.dump(data, json_file)
 
-    # flash('Transaction has been sent!', 'info')
     return results
 
 @app.route('/verify-package', methods=["POST"])
@@ -205,7 +204,7 @@ def verify_data():
     obj_blockchainethereum = BlockchainEthereum()
     confirm = obj_blockchainethereum.verify_transaction(results, package, full_url)    
     print("Dataset "+package+" is "+str(confirm))
-    return str(confirm)
+    return {'result': f'{confirm}'} 
 
 @app.route('/about')
 def about():

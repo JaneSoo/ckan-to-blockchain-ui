@@ -1,15 +1,5 @@
-function loadInputUrl() {
-  document.getElementById('ckan-input-url').type = "url";
-  document.getElementById('find-ckan-packages').hidden = false;
-}
-
-function searchCkanUrl() {
-  document.getElementById('find-ckan-packages').on('click')
-}
-
 function getPackages() {
   var url = document.getElementById('ckan-input-url');
-  console.log(url.value)
   var entry = {
     url: url.value
   };
@@ -33,7 +23,6 @@ function getPackages() {
       document.getElementById('label-select').style.visibility = 'visible';
       document.getElementById('packages').style.visibility = 'visible';
       var packages = data['package_lists'];
-      console.log(packages)
       packages.forEach(function(package) {
         var option = document.createElement("option");
         option.text = package;
@@ -50,10 +39,12 @@ function getPackages() {
 }
 
 function storePackage() {
+  document.getElementById('btn-store-package').disabled = true;
+  document.getElementById('bth-verify-package').disabled = true;
+  document.getElementById('store-loader').removeAttribute('hidden');
   var url = document.getElementById('ckan-input-url');
   var select = document.getElementById('packages');
   var packageValue = select.options[select.selectedIndex].text;
-  console.log(packageValue)
   var entry = {
     url: url.value,
     package: packageValue
@@ -73,32 +64,26 @@ function storePackage() {
       console.log(`Looks like there was a problem. Status code: ${response.status}`);
       return;
     }
+    document.getElementById('store-loader').hidden = true;
+    document.getElementById('bth-verify-package').disabled = false;
+    document.getElementById('btn-store-package').disabled = false;
     response.json().then(function(data) {
-      // document.getElementById('packages').innerHTML = null;
-      // document.getElementById('label-select').style.visibility = 'visible';
-      // document.getElementById('packages').style.visibility = 'visible';
-      // var packages = data['package_lists'];
-      // console.log(packages)
-      // packages.forEach(function(package) {
-      //   var option = document.createElement("option");
-      //   option.text = package;
-      //   option.value = package;
-      //   document.getElementById('packages').appendChild(option);
-      // })
-      // document.getElementById('btn-store-package').style.visibility = 'visible';
-      // document.getElementById('bth-verify-package').style.visibility = 'visible';
+      alert('Dataset package has been stored successfully!')
     });
   })
   .catch(function(error) {
+    alert("Process failed")
     console.log("Fetch error: " + error);
   });
 }
 
-function verifyPackage() {
+function verifyPackage(event) {
+  document.getElementById('bth-verify-package').disabled = true;
+  document.getElementById('btn-store-package').disabled = true;
+  document.getElementById('verify-loader').removeAttribute('hidden');
   var url = document.getElementById('ckan-input-url');
   var select = document.getElementById('packages');
   var packageValue = select.options[select.selectedIndex].text;
-  console.log(packageValue)
   var entry = {
     url: url.value,
     package: packageValue
@@ -118,16 +103,30 @@ function verifyPackage() {
       console.log(`Looks like there was a problem. Status code: ${response.status}`);
       return;
     }
+    document.getElementById('verify-loader').hidden = true;
+    document.getElementById('bth-verify-package').disabled = false;
+    document.getElementById('btn-store-package').disabled = false;
     response.json().then(function(data) {
+      const loader = document.querySelector('.loader');
+      loader.hidden = false;
+      if(data.result == 'True') {
+        setTimeout(() => {
+          loader.classList.add('success');
+        }, 100)
+        setTimeout(() => {
+          document.getElementById('spinLoader').hidden = true;
+        }, 5000)
+      } else {
+        setTimeout(() => {
+          loader.classList.add('fail');
+        }, 100)
+        setTimeout(() => {
+          document.getElementById('spinLoader').hidden = true;
+        }, 5000)
+      }
     });
   })
   .catch(function(error) {
     console.log("Fetch error: " + error);
   });
 }
-
-$(document).ready(function() {
-  setTimeout(function(){
-    $("div.alert=info").remove();
-  }, 5000 ); // 5 secs
-});

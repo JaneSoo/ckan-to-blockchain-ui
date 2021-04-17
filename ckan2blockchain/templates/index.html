@@ -1,11 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  {% for category, message in get_flashed_messages(with_categories=True) %}
-    <div class="alert-{{category}}">{{ message }}</div>
-  {% endfor %}
-  <br>
-  <p align='center'> 
+  <span class="loader" id="spinLoader" hidden></span>
+  <p align="center"> 
     <b>Ethereum Address (Rinkeby Test network):</b>
     <a href="https://rinkeby.etherscan.io/address/0xE8A94362bdaF3755f01fC4DeB10c9AA473be7803" target="_blank"> View transactions on Etherscan</a>
   </p>
@@ -23,8 +20,12 @@
     </div>
     <br>
     <div align="center">
-      <button style="visibility: hidden;" class="btn btn-info" id="btn-store-package" onclick="storePackage()">Store package</button>
-      <button style="visibility: hidden;" class="btn btn-primary" id="bth-verify-package" onclick="verifyPackage()">Verify package</button>
+      <button style="visibility: hidden;" class="btn btn-info" id="btn-store-package" onclick="storePackage()">
+        <i class="fa fa-refresh fa-spin" id="store-loader" hidden></i> Store package
+      </button>
+      <button style="visibility: hidden;" class="btn btn-primary" id="bth-verify-package" onclick="verifyPackage()">
+        <i class="fa fa-refresh fa-spin" id="verify-loader" hidden></i> Verify package
+      </button>
     </div>
     <br>
   </div>  

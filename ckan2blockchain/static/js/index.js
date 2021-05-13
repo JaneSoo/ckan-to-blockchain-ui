@@ -116,6 +116,14 @@ function verifyPackage(event) {
         setTimeout(() => {
           document.getElementById('spinLoader').hidden = true;
         }, 5000)
+      } else if (data.result == 'Transaction not found!'){
+        setTimeout(() => {
+          loader.classList.add('fail');
+          alert('Transaction has not pushed to blockhain yet!');
+        }, 100)
+        setTimeout(() => {
+          document.getElementById('spinLoader').hidden = true;
+        }, 5000)
       } else {
         setTimeout(() => {
           loader.classList.add('fail');

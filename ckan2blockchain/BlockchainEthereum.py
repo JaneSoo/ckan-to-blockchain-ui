@@ -97,8 +97,8 @@ class BlockchainEthereum:
                 self.w3.eth.sendTransaction({
                     'from': self.w3.eth.coinbase,
                     'to': account.address,
-                    # 'gas': 21000,
-                    'value': 10000000,
+                    'gas': 30000,
+                    'value': 0,
                     'nonce': self.w3.eth.getTransactionCount(self.w3.eth.coinbase),
                 })
 
@@ -123,6 +123,8 @@ class BlockchainEthereum:
                 if transaction:
                     input_value = transaction.input[2:] if transaction.input.startswith("0x") else transaction.input
                     return (data == input_value)
+            else:
+                return "Transaction not found!"
 
     def send_data(self, data):
         try:
@@ -138,8 +140,7 @@ class BlockchainEthereum:
         signed_transaction = w3.eth.account.signTransaction({
             'nonce': w3.eth.getTransactionCount(account.address, 'pending'),
             'gasPrice': w3.eth.gasPrice,
-            'gas': 900000,
-
+            'gas': 30000,
             'to': config('ADDRESS'),
             'value': 0,
             'data': data

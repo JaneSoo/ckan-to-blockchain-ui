@@ -1,7 +1,9 @@
 from web3 import Web3, EthereumTesterProvider, HTTPProvider
+from web3.middleware import geth_poa_middleware
 from eth_account import Account
 from eth_tester import EthereumTester
 from decouple import config
+from datetime import datetime
 
 import argparse, getpass, hashlib, time, json, binascii, sys, ethereum.exceptions, pdb
 
@@ -118,13 +120,24 @@ class BlockchainEthereum:
         with open('data1.json') as json_file:
             trx_hashes = json.load(json_file)
             trx_hash = trx_hashes[f'{full_url}'][0].get(package)
+
+            self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+            self.w3.eth
+
             if trx_hash:
                 transaction = self.w3.eth.getTransaction(trx_hash)
+                block_num = transaction.blockNumber
+                block = self.w3.eth.getBlock(block_num)
+                timestamp = block.timestamp
+
                 if transaction:
                     input_value = transaction.input[2:] if transaction.input.startswith("0x") else transaction.input
-                    return (data == input_value)
+                    result = (data == input_value)
+                    result_dict = {'block_num': block_num, 'trx_hash': trx_hash, 'timestamp': f'{datetime.utcfromtimestamp(timestamp)}', 'result': result}
+                    return result_dict
             else:
-                return "Transaction not found!"
+                result = {'result': 'Transaction not found!'}
+                return result
 
     def send_data(self, data):
         try:

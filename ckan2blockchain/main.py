@@ -130,13 +130,15 @@ class PackageHash(Resource):
         url = re.sub('/action/package.*', '', full_url)
         obj_ckan = CkanCrawler(package)
         results = {}
+        try:
+            (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
+            results[package_hash] = dataset_hash
 
-        (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
-        results[package_hash] = dataset_hash
-
-        obj_blockchainethereum = BlockchainEthereum()
-        confirm = obj_blockchainethereum.verify_transaction(results, package, full_url)
-        return {'result': f'{confirm}'}
+            obj_blockchainethereum = BlockchainEthereum()
+            confirm = obj_blockchainethereum.verify_transaction(results, package, full_url)
+            return confirm
+        except Exception as e:
+            return {'result': 'Error downloading package'}
 
 api.add_resource(PackageHash, '/requestPackageHash')
 
@@ -161,33 +163,36 @@ def store_package():
     obj_ckan = CkanCrawler(package)
     results = {}
     url = re.sub('/action/package.*', '', full_url)
-    (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
-    results[package_hash] = dataset_hash
 
-    #2 add to blockchain
-    obj_blockchainethereum = BlockchainEthereum()
-    trx_hash = obj_blockchainethereum.add_to_blockchain(results)
+    try:
+        (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
+        results[package_hash] = dataset_hash
 
-    #3 store package name and transaction key to json
-    with open('data1.json', 'r') as json_file:
-        data = json.load(json_file)
-        if full_url in data:
-            if package in data[full_url][0]:
-                data[full_url][0][package] = trx_hash.hex()
+        #2 add to blockchain
+        obj_blockchainethereum = BlockchainEthereum()
+        trx_hash = obj_blockchainethereum.add_to_blockchain(results)
+
+        #3 store package name and transaction key to json
+        with open('data1.json', 'r') as json_file:
+            data = json.load(json_file)
+            if full_url in data:
+                if package in data[full_url][0]:
+                    data[full_url][0][package] = trx_hash.hex()
+                else:
+                    data[full_url][0].update({
+                        f'{package}': trx_hash.hex()
+                    })
             else:
-                data[full_url][0].update({
+                data[full_url] = []
+                data[full_url].append({
                     f'{package}': trx_hash.hex()
                 })
-        else:
-            data[full_url] = []
-            data[full_url].append({
-                f'{package}': trx_hash.hex()
-            })
 
-    with open('data1.json', 'w') as json_file:
-        json.dump(data, json_file)
-
-    return results
+        with open('data1.json', 'w') as json_file:
+            json.dump(data, json_file)
+        return {'trx_hash': trx_hash.hex()}
+    except Exception as e:
+        return {'trx_hash': "Error downloading package"}
 
 @app.route('/verify-package', methods=["POST"])
 def verify_data():
@@ -198,13 +203,17 @@ def verify_data():
     obj_ckan = CkanCrawler(package)
     results = {}
     url = re.sub('/action/package.*', '', full_url)
-    (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
-    results[package_hash] = dataset_hash
 
-    obj_blockchainethereum = BlockchainEthereum()
-    confirm = obj_blockchainethereum.verify_transaction(results, package, full_url)    
-    print("Dataset "+package+" is "+str(confirm))
-    return {'result': f'{confirm}'} 
+    try:
+        (package_hash, dataset_hash) = obj_ckan.hash_package1(url, package)
+        results[package_hash] = dataset_hash
+        obj_blockchainethereum = BlockchainEthereum()
+        confirm = obj_blockchainethereum.verify_transaction(results, package, full_url)
+        print("Dataset "+package+" is "+str(confirm['result']))
+        return confirm
+    except Exception as e:
+        print("Error downloading package")
+        return {'result': "Error downloading package"}
 
 @app.route('/about')
 def about():

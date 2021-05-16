@@ -1,3 +1,42 @@
+body {
+  background-color: #002b36;
+}
+
+h1, p, label{
+  color: white;
+}
+
+p{
+  font-family: Verdana;
+  font-size: 16px;
+}
+
+.package-input{
+  height: 45px;
+  background-color: transparent;
+  color: white;
+}
+
+.btn-info, .btn-primary{
+  height: 45px;
+}
+
+.select2-selection__rendered {
+  line-height: 40px !important;
+  color: white;
+}
+.select2-container .select2-selection--single {
+  background-color: transparent;
+  height: 45px !important;
+}
+.select2-selection__arrow {
+  height: 44px !important;
+}
+
+#select2-packages-container{
+  color: white;
+}
+
 .input-group {
   width: 100%;
 }
@@ -14,7 +53,7 @@
 .loader {
   position: absolute;
   content: '';
-  top: calc(35%);
+  top: calc(65%);
   left: calc(50% - 14rem);
   width: 6rem;
   height: 6rem;

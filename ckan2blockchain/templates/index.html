@@ -2,6 +2,14 @@
 
 {% block content %}
   <span class="loader" id="spinLoader" hidden></span>
+  <h1 align="center" style="font-family: Garamond;">Pushing Hash to Ethereum</h1>
+  <p align="center">This web application allows users to push any CKAN dataset of interest to Ethereum blockchain. 
+    <br>The dataset will be downloaded and converted into hash set before sending to Ethereum. 
+    Users can verify the integrity of the data anytime as they wish.
+    <br>It is recommended that you understand how CKAN API works. For that checkout: <a href="https://ckan.org/">CKAN</a> or the <a href="https://opendata.praha.eu/api/3/action/package_list" target="_blank">JSON format</a>
+    <br>We also set up an even more flexible way to verify through Chrome extenstion. Find the project <a href="https://github.com/JaneSoo/package-verification" target="_blank">here</a>
+  </p>
+  <hr style="width: 100px;">
   <p align="center"> 
     <b>Ethereum Address (Rinkeby Test network):</b>
     <a href="https://rinkeby.etherscan.io/address/0xd2bedda8fb2ab7d39edaf3d735fb309322d61b42" target="_blank"> View transactions on Etherscan</a>
@@ -9,15 +17,14 @@
   <div class="container">
     <p>Please specify valid CKAN api url to store or verify data. Example: <a href="https://opendata.praha.eu/api/3/action/package_list">https://opendata.praha.eu/api/3/action/package_list</a></p>
     <div class="input-group" align="center">
-      <input required id="ckan-input-url" name="Ckan Url" placeholder="Valid Ckan API URL package list" class="form-control">
+      <input required id="ckan-input-url" name="Ckan Url" placeholder="Valid Ckan API URL package list" class="package-input form-control">
       <button class="btn btn-info" id="find-ckan-packages" onclick="getPackages()">Go</button>
     </div>
 
     <label style="visibility: hidden; margin-top: 15px; margin-left: 5px;" for="packages" id="label-select"> Choose package</label>
-    <div align="center">
-      <select style="visibility: hidden" name="packages" id="packages", class="form-control">
-      </select>
-    </div>
+    <select style="visibility: hidden" name="packages" id="packages", class="package-select2 form-control">
+    </select>
+    <br>
     <br>
     <div align="center">
       <button style="visibility: hidden;" class="btn btn-info" id="btn-store-package" onclick="storePackage()">
@@ -26,6 +33,10 @@
       <button style="visibility: hidden;" class="btn btn-primary" id="bth-verify-package" onclick="verifyPackage()">
         <i class="fa fa-refresh fa-spin" id="verify-loader" hidden></i> Verify package
       </button>
+    </div>
+    <br>
+    <div id="detail-info" align="center">
+
     </div>
     <br>
   </div>  

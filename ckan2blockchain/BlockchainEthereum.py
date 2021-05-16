@@ -122,7 +122,6 @@ class BlockchainEthereum:
             trx_hash = trx_hashes[f'{full_url}'][0].get(package)
 
             self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-            self.w3.eth
 
             if trx_hash:
                 transaction = self.w3.eth.getTransaction(trx_hash)

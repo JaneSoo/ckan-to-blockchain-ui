@@ -9,5 +9,3 @@
 
 #### To start the app
 Navigate to `ckan2blockchain` folder and run `python3 main.py`
-
-

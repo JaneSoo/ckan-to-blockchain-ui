@@ -11,9 +11,9 @@
 1. create `.env` file following `.env.example`
     - replace your own `password` using to create account above
     - put in there the public address
-    - specify the full path to the keystore (it is recommend to copy the keystore file to the project for easier run with Docker)
+    - specify the full path to the keystore (it is recommended to copy the keystore file to the project for easier run with Docker)
 
-#### Easy way start the app with Docker
+#### Easy way to start the app with Docker
 - Open the project path in terminal
 - Navigate to `ckan2blockchain` folder
 - Run `docker build -t use-any-name .`

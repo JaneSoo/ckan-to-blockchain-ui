@@ -22,12 +22,12 @@ class BlockchainEthereum:
     #     elif provider == 'local':
     #         self.w3 = Web3(Web3.IPCProvider())
     #     elif provider == 'network':
-    #         self.w3 = Web3(HTTPProvider('https://rinkeby.infura.io/v3/0c8c84ad8965460489bbdd389b3dd0fd'))
+    #         self.w3 = Web3(HTTPProvider(config('INFURA_URL)))
     #     else:
     #         self.w3 = Web3(HTTPProvider(provider))
 
     def __init__(self):
-        self.w3 = Web3(HTTPProvider('https://rinkeby.infura.io/v3/0c8c84ad8965460489bbdd389b3dd0fd'))
+        self.w3 = Web3(HTTPProvider(config('INFURA_URL')))
 
     def handle_command(self, command):
         if command=='eth-create-address':
@@ -148,7 +148,7 @@ class BlockchainEthereum:
 
         account = Account.privateKeyToAccount(private_key)
         
-        w3 = Web3(HTTPProvider('https://rinkeby.infura.io/v3/0c8c84ad8965460489bbdd389b3dd0fd'))
+        w3 = Web3(HTTPProvider(config('INFURA_URL')))
         signed_transaction = w3.eth.account.signTransaction({
             'nonce': w3.eth.getTransactionCount(account.address, 'pending'),
             'gasPrice': w3.eth.gasPrice,

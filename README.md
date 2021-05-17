@@ -10,7 +10,8 @@
     - after that it will return the `public address` and the path to the `keystore` 
 1. create `.env` file following `.env.example`
     - replace your own `password` using to create account above
-    - put in there the public address
+    - put in there the public address (Address should be similar to this `0xD2beDdA8fB2aB7D39eDaF3d735fb309322D61B42`)
+    - don't forget to feed your account wallet with ether otherwise you can't push transaction. Do it [here](https://faucet.rinkeby.io/)
     - specify the full path to the keystore (it is recommend to copy the keystore file to the project for easier run with Docker)
 
 #### Easy way start the app with Docker

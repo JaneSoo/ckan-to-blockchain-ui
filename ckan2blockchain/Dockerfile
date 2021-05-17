@@ -14,6 +14,5 @@ RUN pip3 install eth-tester
 RUN pip3 install 'rlp==0.6.0'
 RUN pip3 install python-dotenv
 COPY . .
-RUN pwd
 EXPOSE 3000
 CMD [ "python3", "main.py" ]

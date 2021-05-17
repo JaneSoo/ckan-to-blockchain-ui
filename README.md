@@ -16,6 +16,6 @@
 #### Easy way start the app with Docker
 - Open the project path in terminal
 - Navigate to `ckan2blockchain` folder
-- Run `docker build -t use-any-name`
+- Run `docker build -t use-any-name .`
 - Then run `docker run -p 0.0.0.0:3000:3000 use-any-name`
 - Navigate to your browser, type `0.0.0.0:3000` and enter

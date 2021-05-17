@@ -16,4 +16,4 @@
 - Open the project path in terminal
 - Navigate to `ckan2blockchain` folder
 - Run `docker build -t use-any-name`
-- Then run `docker run use-any-name`
+- Then run `docker run -p 0.0.0.0:3000:3000 use-any-name`

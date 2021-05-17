@@ -15,7 +15,7 @@
     - don't forget to feed your account balance with ether otherwise you can't push transaction. Do it following instruction [here](https://faucet.rinkeby.io/)
         - **Ether value will only show in the Rinkeby Testnet while in the mainnet the address will not hold any ether**
     - specify the full path to the keystore (it is recommend to copy the keystore file to the project for easier run with Docker)
-
+        - **Keystore file is by default a text file so just rename and add extension of `json` that will work**
 #### Spin up the app with Docker
 - Open the terminal and navigate to where the project locates
 - Navigate to `ckan2blockchain` folder
